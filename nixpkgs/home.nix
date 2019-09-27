@@ -18,6 +18,8 @@ in
     taffybar
     i3lock
     git
+    dmenu
+    haskellPackages.yeganesh
   ];
   services.screen-locker = {
     enable = true;
@@ -34,7 +36,7 @@ in
       enable = true;
       enableContribAndExtras = true;
       extraPackages = haskellPackages: [
-        haskellPackages.taffybar
+        haskellPackages.xmobar
         haskellPackages.yeganesh
       ]; 
       config = ~/.config/xmonad/xmonad.hs; 
