@@ -27,7 +27,7 @@
       config = ~/.config/xmonad/xmonad.hs; 
     }; 
   };
-  # services.taffybar.enable = true;
+  
   xresources.properties = {
     "Xft.dpi" = 180;
     "Xft.autohint" = 0;
@@ -37,4 +37,10 @@
     "Xft.antialias" = 1;
     "Xft.rgba" = "rgb";
   };
+
+  programs.git = {
+    userEmail = "l@lucasvo.com";
+    userName = "Lucas Vogelsang";
+  }    
+
 }
