@@ -1,8 +1,20 @@
 { pkgs, ...}:
+let 
+  urxvt = import ~/.config/nixpkgs/urxvt.nix { inherit pkgs; };
+in
 { 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.packageOverrides = pkgs_: with pkgs_; {
+    my_1password = import ~/.config/nixpkgs/1password.nix {inherit (pkgs) stdenv fetchzip; };
+  };
   home.packages = with pkgs; [
-    rxvt_unicode
+    my_1password
+    vlc
+    signal-desktop
+    slack
+    zoom-us
+    firefox
+    rxvt_unicode-with-plugins
     taffybar
     i3lock
     git
@@ -23,24 +35,17 @@
       enableContribAndExtras = true;
       extraPackages = haskellPackages: [
         haskellPackages.taffybar
+        haskellPackages.yeganesh
       ]; 
       config = ~/.config/xmonad/xmonad.hs; 
     }; 
   };
-  
-  xresources.properties = {
-    "Xft.dpi" = 180;
-    "Xft.autohint" = 0;
-    "Xft.lcdfilter" = "lcddefault";
-    "Xft.hintstyle" = "hintful";
-    "Xft.hinting" = 1;
-    "Xft.antialias" = 1;
-    "Xft.rgba" = "rgb";
-  };
+
+  xresources.extraConfig = builtins.readFile ~/.config/xresources;
 
   programs.git = {
-    userEmail = "l@lucasvo.com";
-    userName = "Lucas Vogelsang";
-  }    
+    userEmail = ''l@lucasvo.com'';
+    userName = ''Lucas Vogelsang'';
+  };
 
 }

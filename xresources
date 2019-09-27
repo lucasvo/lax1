@@ -1,0 +1,19 @@
+Xft.dpi = 180
+Xft.autohint: 0
+Xft.lcdfilter: lcddefault
+Xft.hintstyle: hintful
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgb
+ 
+urxvt*fadeColor: 		#000000	
+urxvt*cursorBlink:		true
+urxvt*scrollBar:		false
+urxvt*depth:		32
+urxvt*internalBorder: 2
+
+
+! -- Fonts -- !
+URxvt.font:xft:Monospace:size=11
+URxvt.boldfont:xft:Monospace-Bold:size=11
+
