@@ -20,10 +20,14 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Layout.Grid
 import XMonad.Layout.IndependentScreens
 import XMonad.Layout.Magnifier
 import XMonad.Layout.NoBorders
+import XMonad.Layout.BinarySpacePartition
+import XMonad.Layout.ThreeColumns
+import XMonad.Layout.Spacing
 import XMonad.Util.Dzen
 import XMonad.Util.EZConfig
 import XMonad.Util.Run
@@ -61,10 +65,14 @@ fullscreenMPlayer = className =? "MPlayer" --> do
         liftX  $ withScreen s view
         return . Endo $ view ws . shiftWin ws w
 
+myLayoutHook = ThreeColMid 1 (3/100) (1/2)
+  ||| emptyBSP
+
 main = do
     nScreens    <- countScreens
-    hs          <- mapM (spawnPipe . xmobarCommand) [0 .. nScreens-1]
-    xmonad $ defaultConfig {
+--    hs          <- mapM (spawnPipe . xmobarCommand) [0 .. nScreens-1]
+    xmproc  <- spawnPipe "xmobar"
+    xmonad $ docks defaultConfig {
         borderWidth             = 2,
         workspaces              = withScreens nScreens (map show [1..5]),
         terminal                = "urxvt",
@@ -72,26 +80,32 @@ main = do
         focusedBorderColor      = bright,
         modMask                 = mod4Mask,
         keys                    = keyBindings,
-        layoutHook              = magnifierOff $ avoidStruts (GridRatio 0.9) ||| noBorders Full,
+        layoutHook              = smartSpacing 4 $ smartBorders $ avoidStruts $ myLayoutHook,  
         manageHook              = floatAll ["Gimp", "Wine"]
                                   <+> (title =? "CGoban: Main Window" --> doF sinkFocus)
                                   <+> (isFullscreen --> doFullFloat)
                                   <+> fullscreenMPlayer
                                   <+> manageDocks
                                   <+> manageSpawn,
-        logHook                 = mapM_ dynamicLogWithPP $ zipWith pp hs [0..nScreens]
+        handleEventHook         = ewmhDesktopsEventHook,
+        logHook                 = ewmhDesktopsLogHook <+> dynamicLogWithPP xmobarPP
+                        { ppOutput = hPutStrLn xmproc
+                        , ppCurrent = xmobarColor bright ""
+                        , ppTitle = xmobarColor bright "" . shorten 50
+                        }
         }
 
 keyBindings conf = let m = modMask conf in fromList $ [
-    ((m                , xK_BackSpace  ), spawn "urxvt"),
-    ((m                , xK_p          ), spawn launcher),
-    ((m .|. shiftMask  , xK_p          ), spawn termLauncher),
+    ((m                , xK_BackSpace  ), spawnHere "urxvt"),
+    ((m                , xK_p          ), spawnHere launcher),
+    ((m .|. shiftMask  , xK_p          ), spawnHere termLauncher),
     ((m .|. shiftMask  , xK_c          ), kill),
     ((m                , xK_q          ), restart "xmonad" True),
     ((m .|. shiftMask  , xK_q          ), io (exitWith ExitSuccess)),
     ((m                , xK_grave      ), sendMessage NextLayout),
     ((m .|. shiftMask  , xK_grave      ), setLayout $ layoutHook conf),
     ((m                , xK_o          ), sendMessage Toggle),
+    ((m                , xK_b          ), sendMessage ToggleStruts),
     ((m                , xK_x          ), withFocused (windows . sink)),
     ((m                , xK_Home       ), windows focusUp),
     ((m .|. shiftMask  , xK_Home       ), windows swapUp),
@@ -108,17 +122,15 @@ keyBindings conf = let m = modMask conf in fromList $ [
     ((m .|. mod1Mask   , xK_u          ), centerMouse),
     ((m .|. shiftMask  , xK_u          ), statusBarMouse),
     ((m                , xK_s          ), spawn "firefox"),
-    ((m                , xK_n          ), spawn "gvim todo"),
-    ((m                , xK_t          ), spawn "mpc toggle"),
+    ((m                , xK_n          ), spawn "urxvt -e vim todo"),
+    ((m                , xK_v          ), spawn "urxvt -e vim"),
     ((m                , xK_h          ), spawn "urxvt -e alsamixer"),
     ((m                , xK_d          ), spawn "wyvern"),
     ((m                , xK_l          ), spawn "urxvt -e sup"),
-    ((m                , xK_r          ), spawn "urxvt -e ncmpcpp"),
-    ((m                , xK_c          ), spawn "urxvt -e ghci"),
-    ((m                , xK_g          ), spawn "slock" >> spawn "kdesktop_lock --forcelock"),
-    ((m                , xK_f          ), spawn "gvim ~/.xmonad/xmonad.hs"),
-    ((0                , xK_F8         ), onChannels lowerVolumeChannels),
-    ((0                , xK_F9         ), onChannels raiseVolumeChannels)
+    ((m                , xK_g          ), spawn "i3lock -n -c d71717"),
+    ((m                , xK_f          ), spawn "gvim ~/.xmonad/xmonad.hs")
+    --((0                , xK_F8         ), onChannels lowerVolumeChannels),
+    --((0                , xK_F9         ), onChannels raiseVolumeChannels)
     ] ++ [
     ((m .|. e .|. i    , key           ), windows (onCurrentScreen f workspace))
     | (key, workspace) <- zip [xK_1..xK_9] (workspaces' conf)

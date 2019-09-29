@@ -15,15 +15,20 @@ in
     zoom-us
     firefox
     rxvt_unicode-with-plugins
-    taffybar
     i3lock
     git
     dmenu
+    feh
+    gimp
+    evince
+    transmission 
+    haskellPackages.xmobar
     haskellPackages.yeganesh
-  ];
+    haskellPackages.taffybar
+ ];
   services.screen-locker = {
     enable = true;
-    lockCmd = "${pkgs.i3lock}/bin/i3lock -n -c 000000";
+    lockCmd = "${pkgs.i3lock}/bin/i3lock -n -c d71717";
   };
   xsession = {
     enable = true;
@@ -32,11 +37,16 @@ in
       name = "Vanilla-DMZ-AA";
       size = 48;
     };
+    profileExtra = ''
+feh --bg-scale ~/.config/joris-berthelot-EnTU_hr9wPA-unsplash.jpg &
+# xloadimage -onroot -fullscreen ~/.config/joris-berthelot-EnTU_hr9wPA-unsplash.jpg
+''; 
     windowManager.xmonad = {
       enable = true;
       enableContribAndExtras = true;
       extraPackages = haskellPackages: [
         haskellPackages.xmobar
+        haskellPackages.taffybar
         haskellPackages.yeganesh
       ]; 
       config = ~/.config/xmonad/xmonad.hs; 
